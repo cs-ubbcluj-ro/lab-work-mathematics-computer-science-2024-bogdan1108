@@ -1,0 +1,104 @@
+# MINILANGUAGE SPECIFICATION
+
+## LANGUAGE DEFINITION
+
+### Alphabet:
+
+<letter> ::= "A" | "B" | ... | "Z" | "a" | "b" | ... | "z" ; 
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ; 
+<symbol> ::= “_” ;
+
+### Lexicon:
+
+#### Special Symbols:
+<operator> ::= "+" | "-" | "*" | "/" | ":=" | "<" | "<=" | "=" | ">=" ; 
+<separator> ::= "[" | "]" | "{" | "}" | ":" | ";" | " " ;
+
+#### Keywords:
+<keyword> ::= "int" | "float" | "var" | "if" | "else" | "while" | "read" | "write" ;
+
+#### Identifiers:
+<identifier> ::= <letter> , { <letter> | <digit> } ;
+
+#### Constants:
+<integer> ::= [ "+" | "-" ] , <digit> , { <digit> } ; 
+<float> ::= [ "+" | "-" ] , <digit> , { <digit> } , "." , <digit> , { <digit> } ; 
+<string> ::= '"' , { <char> } , '"' ; 
+<char> ::= <letter> | <digit> ;
+
+---
+
+## SYNTAX
+
+### Program Structure:
+<program> ::= "VAR" , <decllist> , ";" , <cmpdstmt> , "." ;
+
+### Declaration List:
+<decllist> ::= <declaration> | <declaration> , ";" , <decllist> ;
+<declaration> ::= <IDENTIFIER> , ":" , <type> ;
+
+### Types:
+<type1> ::= "BOOLEAN" | "CHAR" | "INTEGER" | "REAL" ;
+<arraydecl> ::= "ARRAY" , "[" , <nr> , "]" , "OF" , <type1> ;
+<type> ::= <type1> | <arraydecl> ;
+
+### Compound Statement:
+<cmpdstmt> ::= "BEGIN" , <stmtlist> , "END" ;
+<stmtlist> ::= <stmt> | <stmt> , ";" , <stmtlist> ;
+<stmt> ::= <simplstmt> | <structstmt> ;
+
+### Simple Statements:
+<simplstmt> ::= <assignstmt> | <iostmt> ;
+<assignstmt> ::= <IDENTIFIER> , ":=" , <expression> ;
+<iostmt> ::= "READ" , "(" , <IDENTIFIER> , ")" | "WRITE" , "(" , <IDENTIFIER> , ")" ;
+
+### Expressions:
+<expression> ::= <expression> , "+" , <term> | <term> ;
+<term> ::= <term> , "*" , <factor> | <factor> ;
+<factor> ::= "(" , <expression> , ")" | <IDENTIFIER> ;
+
+### Structured Statements:
+<structstmt> ::= <cmpdstmt> | <ifstmt> | <whilestmt> ;
+<ifstmt> ::= "IF" , <condition> , "THEN" , <stmt> , [ "ELSE" , <stmt> ] ;
+<whilestmt> ::= "WHILE" , <condition> , "DO" , <stmt> ;
+
+### Conditions:
+<condition> ::= <expression> , <RELATION> , <expression> ;
+<RELATION> ::= "<" | "<=" | "=" | "<>" | ">=" | ">" ;
+
+---
+
+## Example Program: Find the First `k` Prime Numbers
+
+VAR
+    k : int;
+    count : int;
+    num : int;
+    i : int;
+    is_prime : int;
+
+BEGIN
+    READ(k);
+    count := 0;
+    num := 2;
+
+    WHILE count < k DO
+        is_prime := 1;
+        i := 2;
+
+        WHILE i * i <= num DO
+            IF num % i = 0 THEN
+                is_prime := 0;
+            END;
+
+            i := i + 1;
+        END;
+
+        IF is_prime = 1 THEN
+            WRITE(num);
+            count := count + 1;
+        END;
+
+        num := num + 1;
+    END;
+END.
