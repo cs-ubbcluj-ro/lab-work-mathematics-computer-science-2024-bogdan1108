@@ -1,0 +1,32 @@
+VAR
+    k : int;
+    count : int;
+    num : int;
+    i : int;
+    is_prime : int;
+
+BEGIN
+    READ(k);
+    count := 0;
+    num := 2;
+
+    WHILE count < k DO
+        is_prime := 1;
+        i := 2;
+
+        WHILE i * i <= num DO
+            IF num % i = 0 THEN
+                is_prime := 0;
+            END;
+
+            i := i + 1;
+        END;
+
+        IF is_prime = 1 THEN
+            WRITE(num);
+            count := count + 1;
+        END;
+
+        num := num + 1;
+    END;
+END.
