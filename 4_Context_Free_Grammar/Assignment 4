@@ -1,0 +1,145 @@
+# Grammar File for MINILANGUAGE Syntax
+
+# Start Symbol
+<program>
+
+# Non-Terminal Symbols
+<program>, <decllist>, <declaration>, <type>, <type1>, <arraydecl>, <cmpdstmt>, <stmtlist>, <stmt>, <simplstmt>, <assignstmt>, <iostmt>, <expression>, <term>, <factor>, <structstmt>, <ifstmt>, <whilestmt>, <condition>, <relation>, <identifier>, <letter_digit_sequence>, <letter>, <digit>, <nr>, <string>, <char>, <boolconst>
+
+# Terminal Symbols
+"VAR", "BOOLEAN", "CHAR", "INTEGER", "REAL", "ARRAY", "[", "]", "OF", "BEGIN", "END", ";", ":=", "READ", "(", ")", "WRITE", "+", "*", "IF", "THEN", "ELSE", "WHILE", "DO", "<", "<=", "=", "<>", ">=", ">", "TRUE", "FALSE", "A", "B", ..., "Z", "a", "b", ..., "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+
+# Productions
+<program> -> "VAR" <decllist> ";" <cmpdstmt> "."
+
+<decllist> -> <declaration>
+             | <declaration> ";" <decllist>
+
+definition>
+
+<declaration> -> <identifier> ":" <type>
+
+<type> -> <type1>
+          | <arraydecl>
+
+definition>
+
+<type1> -> "BOOLEAN"
+          | "CHAR"
+          | "INTEGER"
+          | "REAL"
+
+definition>
+
+<arraydecl> -> "ARRAY" "[" <nr> "]" "OF" <type1>
+
+definition>
+
+<cmpdstmt> -> "BEGIN" <stmtlist> "END"
+
+definition>
+
+<stmtlist> -> <stmt>
+             | <stmt> ";" <stmtlist>
+
+definition>
+
+<stmt> -> <simplstmt>
+          | <structstmt>
+
+definition>
+
+<simplstmt> -> <assignstmt>
+               | <iostmt>
+
+definition>
+
+<assignstmt> -> <identifier> ":=" <expression>
+
+definition>
+
+<iostmt> -> "READ" "(" <identifier> ")"
+           | "WRITE" "(" <identifier> ")"
+
+definition>
+
+<expression> -> <expression> "+" <term>
+               | <term>
+
+definition>
+
+<term> -> <term> "*" <factor>
+         | <factor>
+
+definition>
+
+<factor> -> "(" <expression> ")"
+           | <identifier>
+
+definition>
+
+<structstmt> -> <cmpdstmt>
+                | <ifstmt>
+                | <whilestmt>
+
+definition>
+
+<ifstmt> -> "IF" <condition> "THEN" <stmt>
+           | "IF" <condition> "THEN" <stmt> "ELSE" <stmt>
+
+definition>
+
+<whilestmt> -> "WHILE" <condition> "DO" <stmt>
+
+definition>
+
+<condition> -> <expression> <relation> <expression>
+
+definition>
+
+<relation> -> "<"
+              | "<="
+              | "="
+              | "<>"
+              | ">="
+              | ">"
+
+definition>
+
+<identifier> -> <letter>
+                | <letter> <letter_digit_sequence>
+
+definition>
+
+<letter_digit_sequence> -> <letter>
+                           | <digit>
+                           | <letter_digit_sequence> <letter>
+                           | <letter_digit_sequence> <digit>
+
+definition>
+
+<letter> -> "A" | "B" | ... | "Z" | "a" | "b" | ... | "z"
+
+definition>
+
+<digit> -> "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+definition>
+
+<nr> -> <digit>
+        | <digit> <nr>
+
+definition>
+
+<string> -> <char>
+            | <char> <string>
+
+definition>
+
+<char> -> <letter>
+          | <digit>
+
+definition>
+
+<boolconst> -> "TRUE"
+               | "FALSE"
