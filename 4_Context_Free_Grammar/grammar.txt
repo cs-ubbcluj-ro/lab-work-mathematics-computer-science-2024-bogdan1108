@@ -12,22 +12,17 @@
 # Productions
 <program> -> "VAR" <decllist> ";" <cmpdstmt> "."
 
-<decllist> -> <declaration>
-             | <declaration> ";" <decllist>
+<decllist> -> <declaration> | <declaration> ";" <decllist>
 
 definition>
 
 <declaration> -> <identifier> ":" <type>
 
-<type> -> <type1>
-          | <arraydecl>
+<type> -> <type1> | <arraydecl>
 
 definition>
 
-<type1> -> "BOOLEAN"
-          | "CHAR"
-          | "INTEGER"
-          | "REAL"
+<type1> -> "BOOLEAN" | "CHAR" | "INTEGER" | "REAL"
 
 definition>
 
@@ -39,18 +34,15 @@ definition>
 
 definition>
 
-<stmtlist> -> <stmt>
-             | <stmt> ";" <stmtlist>
+<stmtlist> -> <stmt> | <stmt> ";" <stmtlist>
 
 definition>
 
-<stmt> -> <simplstmt>
-          | <structstmt>
+<stmt> -> <simplstmt> | <structstmt>
 
 definition>
 
-<simplstmt> -> <assignstmt>
-               | <iostmt>
+<simplstmt> -> <assignstmt> | <iostmt>
 
 definition>
 
@@ -58,34 +50,27 @@ definition>
 
 definition>
 
-<iostmt> -> "READ" "(" <identifier> ")"
-           | "WRITE" "(" <identifier> ")"
+<iostmt> -> "READ" "(" <identifier> ")" | "WRITE" "(" <identifier> ")"
 
 definition>
 
-<expression> -> <expression> "+" <term>
-               | <term>
+<expression> -> <expression> "+" <term> | <term>
 
 definition>
 
-<term> -> <term> "*" <factor>
-         | <factor>
+<term> -> <term> "*" <factor> | <factor>
 
 definition>
 
-<factor> -> "(" <expression> ")"
-           | <identifier>
+<factor> -> "(" <expression> ")" | <identifier>
 
 definition>
 
-<structstmt> -> <cmpdstmt>
-                | <ifstmt>
-                | <whilestmt>
+<structstmt> -> <cmpdstmt> | <ifstmt> | <whilestmt>
 
 definition>
 
-<ifstmt> -> "IF" <condition> "THEN" <stmt>
-           | "IF" <condition> "THEN" <stmt> "ELSE" <stmt>
+<ifstmt> -> "IF" <condition> "THEN" <stmt> | "IF" <condition> "THEN" <stmt> "ELSE" <stmt>
 
 definition>
 
@@ -97,24 +82,15 @@ definition>
 
 definition>
 
-<relation> -> "<"
-              | "<="
-              | "="
-              | "<>"
-              | ">="
-              | ">"
+<relation> -> "<" | "<=" | "=" | "<>" | ">=" | ">"
 
 definition>
 
-<identifier> -> <letter>
-                | <letter> <letter_digit_sequence>
+<identifier> -> <letter> | <letter> <letter_digit_sequence>
 
 definition>
 
-<letter_digit_sequence> -> <letter>
-                           | <digit>
-                           | <letter_digit_sequence> <letter>
-                           | <letter_digit_sequence> <digit>
+<letter_digit_sequence> -> <letter> | <digit> | <letter_digit_sequence> <letter> | <letter_digit_sequence> <digit>
 
 definition>
 
@@ -126,20 +102,16 @@ definition>
 
 definition>
 
-<nr> -> <digit>
-        | <digit> <nr>
+<nr> -> <digit> | <digit> <nr>
 
 definition>
 
-<string> -> <char>
-            | <char> <string>
+<string> -> <char> | <char> <string>
 
 definition>
 
-<char> -> <letter>
-          | <digit>
+<char> -> <letter> | <digit>
 
 definition>
 
-<boolconst> -> "TRUE"
-               | "FALSE"
+<boolconst> -> "TRUE" | "FALSE"
