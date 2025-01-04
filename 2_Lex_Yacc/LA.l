@@ -2,9 +2,17 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-    #include "y.tab.h" // Ensure this header matches your Bison/Yacc output for token definitions.
 
-    extern int yylval;
+    #define KEYWORD 256
+    #define ID 257
+    #define INT_CONST 258
+    #define FLOAT_CONST 259
+    #define STRING_CONST 260
+    #define OPERATOR 261
+    #define SEPARATOR 262
+    #define ERROR 263
+
+    int yylval; // Define yylval directly here to avoid linker errors
     extern int yylineno; // Line number from Lex
 
     int st_index = 0; // Index for Symbol Table
@@ -54,19 +62,29 @@
 %option noyywrap
 
 %%
+[ \t\r]+ {
+    // Ignore whitespace (space, tab, carriage return)
+    yycolumn += yyleng;
+}
+
+\n {
+    yycolumn = 1; // Reset column on newline
+    yylineno++;   // Increment line number
+}
+
 "VAR"|"BEGIN"|"END"|"READ"|"WRITE"|"IF"|"THEN"|"ELSE"|"WHILE"|"DO"|"int"|"float"|"char" {
-    return KEYWORD; // Defined in y.tab.h
+    return KEYWORD;
 }
 
 ":="|"<="|">="|"="|"<"|">"|"<>" {
-    return OPERATOR; // Defined in y.tab.h
+    return OPERATOR;
 }
 \+|\-|\*|\/|\% {
-    return OPERATOR; // Defined in y.tab.h
+    return OPERATOR;
 }
 
 "["|"]"|"{"|"}"|":"|";"|"("|")" {
-    return SEPARATOR; // Defined in y.tab.h
+    return SEPARATOR;
 }
 
 [a-zA-Z][a-zA-Z0-9_]* {
@@ -75,13 +93,13 @@
         if (pos == -1) { // If not in Symbol Table
             add_to_symbol_table(yytext);
             yylval = st_index - 1; // Assign symbol table index to yylval
-            return ID; // Defined in y.tab.h
+            return ID;
         } else {
             yylval = pos; // Assign existing position in Symbol Table to yylval
-            return ID; // Defined in y.tab.h
+            return ID;
         }
     } else {
-        return KEYWORD; // Defined in y.tab.h
+        return KEYWORD;
     }
 }
 
@@ -90,10 +108,10 @@
     if (pos == -1) {
         add_to_symbol_table(yytext);
         yylval = st_index - 1; // Assign symbol table index to yylval
-        return FLOAT_CONST; // Defined in y.tab.h
+        return FLOAT_CONST;
     } else {
         yylval = pos; // Assign existing position in Symbol Table to yylval
-        return FLOAT_CONST; // Defined in y.tab.h
+        return FLOAT_CONST;
     }
 }
 
@@ -102,10 +120,10 @@
     if (pos == -1) {
         add_to_symbol_table(yytext);
         yylval = st_index - 1; // Assign symbol table index to yylval
-        return INT_CONST; // Defined in y.tab.h
+        return INT_CONST;
     } else {
         yylval = pos; // Assign existing position in Symbol Table to yylval
-        return INT_CONST; // Defined in y.tab.h
+        return INT_CONST;
     }
 }
 
@@ -114,10 +132,10 @@
     if (pos == -1) {
         add_to_symbol_table(yytext);
         yylval = st_index - 1; // Assign symbol table index to yylval
-        return STRING_CONST; // Defined in y.tab.h
+        return STRING_CONST;
     } else {
         yylval = pos; // Assign existing position in Symbol Table to yylval
-        return STRING_CONST; // Defined in y.tab.h
+        return STRING_CONST;
     }
 }
 
@@ -125,6 +143,8 @@
     fprintf(stderr, "Lexical error at line %d, column %d: %s\n", yylineno, yycolumn, yytext);
     return ERROR;
 }
+
+
 %%
 
 int main(int argc, char **argv) {
@@ -140,8 +160,40 @@ int main(int argc, char **argv) {
     }
 
     yyin = input;
-    yylex();
+
+    int token;
+    while ((token = yylex()) != 0) {
+        switch (token) {
+            case KEYWORD:
+                printf("KEYWORD: %s\n", yytext);
+                break;
+            case ID:
+                printf("ID: %s (Symbol Table Index: %d)\n", yytext, yylval);
+                break;
+            case INT_CONST:
+                printf("INT_CONST: %s (Symbol Table Index: %d)\n", yytext, yylval);
+                break;
+            case FLOAT_CONST:
+                printf("FLOAT_CONST: %s (Symbol Table Index: %d)\n", yytext, yylval);
+                break;
+            case STRING_CONST:
+                printf("STRING_CONST: %s (Symbol Table Index: %d)\n", yytext, yylval);
+                break;
+            case OPERATOR:
+                printf("OPERATOR: %s\n", yytext);
+                break;
+            case SEPARATOR:
+                printf("SEPARATOR: %s\n", yytext);
+                break;
+            case ERROR:
+                printf("LEXICAL ERROR: %s\n", yytext);
+                break;
+            default:
+                printf("UNKNOWN TOKEN: %s\n", yytext);
+        }
+    }
 
     fclose(input);
     return 0;
 }
+
