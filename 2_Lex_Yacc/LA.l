@@ -2,26 +2,29 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include "y.tab.h" // Ensure this header matches your Bison/Yacc output for token definitions.
 
-    FILE *pif, *st, *errors;
-    int st_index = 0; // Index pentru Symbol Table
-    int yycolumn = 1; // Poziția curentă în linia de intrare
+    extern int yylval;
+    extern int yylineno; // Line number from Lex
 
-    // Structura pentru Symbol Table (ST)
+    int st_index = 0; // Index for Symbol Table
+    int yycolumn = 1; // Current column position in input line
+
+    // Struct for Symbol Table
     typedef struct {
-        char value[50]; // Valoarea simbolului (ID sau Constanta)
+        char value[50]; // Value of the symbol (ID or Constant)
     } SymbolTableEntry;
 
-    SymbolTableEntry symbolTable[100]; // Tabelul simbolurilor
+    SymbolTableEntry symbolTable[100]; // Symbol Table
 
-    // Cuvinte cheie (keywords)
+    // Keywords
     char *keywords[] = {
         "VAR", "BEGIN", "END", "READ", "WRITE", "IF", "THEN", "ELSE", 
         "WHILE", "DO", "int", "float", "char"
     };
-    int num_keywords = 13;  // Numărul de cuvinte cheie
+    int num_keywords = 13;
 
-    // Funcție pentru a verifica dacă un cuvânt este cuvânt cheie
+    // Check if a word is a keyword
     int is_keyword(const char *str) {
         for (int i = 0; i < num_keywords; i++) {
             if (strcmp(str, keywords[i]) == 0) {
@@ -31,17 +34,17 @@
         return 0;
     }
 
-    // Funcție pentru a verifica dacă un simbol este deja în Symbol Table
+    // Check if a symbol exists in the Symbol Table
     int is_in_symbol_table(const char *str) {
         for (int i = 0; i < st_index; i++) {
             if (strcmp(symbolTable[i].value, str) == 0) {
-                return i; // Returnăm poziția în ST
+                return i; // Return position in ST
             }
         }
-        return -1; // Nu a fost găsit
+        return -1;
     }
 
-    // Funcție pentru a adăuga un simbol în Symbol Table
+    // Add a symbol to the Symbol Table
     void add_to_symbol_table(const char *str) {
         strcpy(symbolTable[st_index].value, str);
         st_index++;
@@ -52,29 +55,33 @@
 
 %%
 "VAR"|"BEGIN"|"END"|"READ"|"WRITE"|"IF"|"THEN"|"ELSE"|"WHILE"|"DO"|"int"|"float"|"char" {
-    fprintf(pif, "KEYWORD | %s | 0\n", yytext);
+    return KEYWORD; // Defined in y.tab.h
 }
 
 ":="|"<="|">="|"="|"<"|">"|"<>" {
-    fprintf(pif, "OPERATOR | %s | 0\n", yytext);
+    return OPERATOR; // Defined in y.tab.h
 }
 \+|\-|\*|\/|\% {
-    fprintf(pif, "OPERATOR | %s | 0\n", yytext);
+    return OPERATOR; // Defined in y.tab.h
 }
 
 "["|"]"|"{"|"}"|":"|";"|"("|")" {
-    fprintf(pif, "SEPARATOR | %s | 0\n", yytext);
+    return SEPARATOR; // Defined in y.tab.h
 }
 
 [a-zA-Z][a-zA-Z0-9_]* {
-    if (!is_keyword(yytext)) { // Nu este cuvânt cheie
+    if (!is_keyword(yytext)) { // Not a keyword
         int pos = is_in_symbol_table(yytext);
-        if (pos == -1) { // Dacă nu este deja în ST
+        if (pos == -1) { // If not in Symbol Table
             add_to_symbol_table(yytext);
-            fprintf(pif, "ID | %d | %d\n", st_index - 1, st_index - 1);
-        } else { // Dacă există deja
-            fprintf(pif, "ID | %d | %d\n", pos, pos);
+            yylval = st_index - 1; // Assign symbol table index to yylval
+            return ID; // Defined in y.tab.h
+        } else {
+            yylval = pos; // Assign existing position in Symbol Table to yylval
+            return ID; // Defined in y.tab.h
         }
+    } else {
+        return KEYWORD; // Defined in y.tab.h
     }
 }
 
@@ -82,9 +89,11 @@
     int pos = is_in_symbol_table(yytext);
     if (pos == -1) {
         add_to_symbol_table(yytext);
-        fprintf(pif, "CONST | %d | %d\n", st_index - 1, st_index - 1);
+        yylval = st_index - 1; // Assign symbol table index to yylval
+        return FLOAT_CONST; // Defined in y.tab.h
     } else {
-        fprintf(pif, "CONST | %d | %d\n", pos, pos);
+        yylval = pos; // Assign existing position in Symbol Table to yylval
+        return FLOAT_CONST; // Defined in y.tab.h
     }
 }
 
@@ -92,9 +101,11 @@
     int pos = is_in_symbol_table(yytext);
     if (pos == -1) {
         add_to_symbol_table(yytext);
-        fprintf(pif, "CONST | %d | %d\n", st_index - 1, st_index - 1);
+        yylval = st_index - 1; // Assign symbol table index to yylval
+        return INT_CONST; // Defined in y.tab.h
     } else {
-        fprintf(pif, "CONST | %d | %d\n", pos, pos);
+        yylval = pos; // Assign existing position in Symbol Table to yylval
+        return INT_CONST; // Defined in y.tab.h
     }
 }
 
@@ -102,48 +113,35 @@
     int pos = is_in_symbol_table(yytext);
     if (pos == -1) {
         add_to_symbol_table(yytext);
-        fprintf(pif, "CONST | %d | %d\n", st_index - 1, st_index - 1);
+        yylval = st_index - 1; // Assign symbol table index to yylval
+        return STRING_CONST; // Defined in y.tab.h
     } else {
-        fprintf(pif, "CONST | %d | %d\n", pos, pos);
+        yylval = pos; // Assign existing position in Symbol Table to yylval
+        return STRING_CONST; // Defined in y.tab.h
     }
 }
 
 . {
-    fprintf(errors, "Eroare lexicală la linia %d, coloana %d: %s\n", yylineno, yycolumn, yytext);
+    fprintf(stderr, "Lexical error at line %d, column %d: %s\n", yylineno, yycolumn, yytext);
+    return ERROR;
 }
 %%
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        printf("Utilizare: ./scanner <fisier_intrare>\n");
+        printf("Usage: ./scanner <input_file>\n");
         return 1;
     }
 
     FILE *input = fopen(argv[1], "r");
     if (!input) {
-        printf("Nu se poate deschide fișierul %s\n", argv[1]);
+        printf("Cannot open file %s\n", argv[1]);
         return 1;
     }
-
-    pif = fopen("PIF.out", "w");
-    st = fopen("ST.out", "w");
-    errors = fopen("Errors.out", "w");
-
-    // Scrierea antetului pentru Symbol Table
-    fprintf(st, "ID/const | Poziție\n");
 
     yyin = input;
     yylex();
 
-    // Scrierea conținutului pentru Symbol Table
-    for (int i = 0; i < st_index; i++) {
-        fprintf(st, "%s | %d\n", symbolTable[i].value, i);
-    }
-
     fclose(input);
-    fclose(pif);
-    fclose(st);
-    fclose(errors);
-
     return 0;
 }
